@@ -1,0 +1,49 @@
+# Copyright 2020 Paul Vollmer. All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+
+version: "3"
+
+services:
+  # the postgres database container
+  postgres:
+    image: postgres:10-alpine
+    container_name: robotstxt_datastore_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: robotstxt
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - robotstxt_datastore_net
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+  # the grpc server container
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: robotstxt_datastoreer_server
+    restart: always
+    environment:
+      DATABASE_HOST: robotstxt_datastore_postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: password
+      DATABASE_NAME: robotstxt
+    ports:
+      - "5000:5000"
+    networks:
+      - robotstxt_datastore_net
+    depends_on:
+      - postgres
+
+networks:
+  robotstxt_datastore_net:

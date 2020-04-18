@@ -1,0 +1,121 @@
+// Copyright 2020 Paul Vollmer. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+syntax = "proto3";
+
+package grpc.robotstxt.v1;
+option go_package = "robotstxt";
+
+import "google/protobuf/timestamp.proto";
+
+service RobotstxtService {
+
+  // Check if a robots.txt source exists or is outdated.
+  rpc CheckRobotstxt (Check) returns (Robotstxt);
+
+  // List robots.txt sources.
+  rpc ListRobotstxts (ListRobotstxtsRequest) returns (ListRobotstxtsResponse);
+
+  // Gets a robots.txt source.
+  rpc GetRobotstxt (GetRobotstxtRequest) returns (Robotstxt);
+}
+
+// Option to set the uri, refresh and sitemap request rpc call.
+message Check {
+  // The host of the robots.txt source.
+  string host = 1;
+
+  // Set to true to request the robots.txt data and update the database.
+	bool refresh = 2;
+
+  // If refresh is true and refresh_after is not 0, then the rpc will decide if a request will be send to the uri.
+  int32 refresh_after = 3;
+}
+
+message Robotstxt {
+  //  The creation date
+  google.protobuf.Timestamp created_at = 1;
+
+  // The update date
+  google.protobuf.Timestamp updated_at = 2;
+
+  // The host is used at the Check rpc to send the request to the server.
+  // The full request URL is build by the default scheme + host + /robots.txt
+  // (for example google.com will become https://google.com/robots.txt).
+  string host = 3;
+
+  // The scheme
+  string scheme = 4;
+
+  // The server response status code
+  int32 statuscode = 5;
+
+  // The server response URL
+  string response_url = 6;
+
+  // The server response time
+  int64 response_time = 7;
+
+  // The server response body
+  string robotstxt = 8;
+
+  // The robots.txt rules array
+  repeated Rule rules = 9;
+
+  // The robots.txt sitemaps string array
+  repeated string sitemaps = 10;
+}
+
+message Rule {
+  // The User-Agent
+	string agent = 1;
+
+  //  The array of paths
+	repeated string paths = 2;
+}
+
+message ListRobotstxtsResponse {
+  // The total number of items at the database.
+  int64 total_count = 1;
+
+  // The list of items to return.
+  repeated Robotstxt items = 2;
+}
+
+// Options to control the number of items and the offset.
+message ListRobotstxtsRequest {
+  // Limit the number of array items.
+  int32 limit  = 1;
+
+  // Request offset.
+  int64 offset = 2;
+
+  // Search for host(s).
+  string search = 4;
+
+  // The available sort options
+  enum Sort {
+    // Sort by host
+    HOST = 0;
+    // Sort by created_at
+    CREATED_AT = 1;
+    // Sort by updated_at
+    UPDATED_AT = 2;
+  }
+  Sort sort_by = 5;
+
+  // The available order options
+  enum Order {
+    // Order by asc
+    ASC = 0;
+    // Order by desc
+    DESC = 1;
+  }
+  Order order_by = 6;
+}
+
+message GetRobotstxtRequest {
+  // The host of the robots.txt source.
+  string host = 1;
+}
