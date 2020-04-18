@@ -18,7 +18,7 @@ At the table below yo find all environment variables to configure the gRPC serve
 | `DEFAULT_REQUEST_SCHEME` | the default scheme used to send requests                     | `https`                         |
 | `DEFAULT_LIMIT`          | the default list limit                                       | `100`                           |
 | `USERAGENT`              | the User-Agent used to send the request                      | `robotstxtbot`                  |
-| `SENTRY_DSN`             | a sentry dsn url                                             | ``                              |
+| `SENTRY_DSN`             | a sentry dsn url                                             |                                 |
 
 ## Development
 
