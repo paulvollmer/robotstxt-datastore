@@ -1,4 +1,4 @@
-# robotstxt-datastore ![CI](https://github.com/paulvollmer/robotstxt-datastore/workflows/CI/badge.svg) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/paulvollmer/htmltable2csv?style=plastic)
+# robotstxt-datastore ![CI](https://github.com/paulvollmer/robotstxt-datastore/workflows/CI/badge.svg) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/paulvollmer/robotstxt-datastore?style=plastic)
 
 `robotstxt-datastore` is a grpc service to store robots.txt data at a postgres database
 
