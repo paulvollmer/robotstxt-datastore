@@ -2,7 +2,8 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-DOCKER_REGISTRY=192.168.0.39:9000
+VERSION := $(shell head -1 VERSION)
+DOCKER_REGISTRY := 192.168.0.39:9000
 
 docker-up:
 	@docker-compose up --build

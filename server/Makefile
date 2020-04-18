@@ -4,14 +4,14 @@
 
 all: fmt lint test build
 
-VERSION=0.1.0
+VERSION := $(shell head -1 ../VERSION)
 
 LDFLAGS := --ldflags "-s -w \
--X github.com/paulvollmer/robotstxt-datastore/version.Version=${VERSION} \
--X github.com/paulvollmer/robotstxt-datastore/version.GitCommit=$(shell git rev-parse --short HEAD 2> /dev/null || true) \
--X github.com/paulvollmer/robotstxt-datastore/version.BuildDate=$(shell date +%Y.%m.%d.%H%M%S) \
--X github.com/paulvollmer/robotstxt-datastore/version.BuildOS=$(shell go env GOHOSTOS) \
--X github.com/paulvollmer/robotstxt-datastore/version.BuildArch=$(shell go env GOHOSTARCH)"
+-X github.com/paulvollmer/robotstxt-datastore/server/version.Version=${VERSION} \
+-X github.com/paulvollmer/robotstxt-datastore/server/version.GitCommit=$(shell git rev-parse --short HEAD 2> /dev/null || true) \
+-X github.com/paulvollmer/robotstxt-datastore/server/version.BuildDate=$(shell date +%Y.%m.%d-%H:%M:%S) \
+-X github.com/paulvollmer/robotstxt-datastore/server/version.BuildOS=$(shell go env GOHOSTOS) \
+-X github.com/paulvollmer/robotstxt-datastore/server/version.BuildArch=$(shell go env GOHOSTARCH)"
 
 fmt:
 	@go fmt ./...
@@ -30,15 +30,15 @@ test-cov: clean
 	@go tool cover -html=coverage.out
 
 build:
-	@go build ${LDFLAGS} -o robotstxt-datastore
+	@go build ${LDFLAGS} -a -o robotstxt-datastore .
 
 build-darwin:
-	@GOOS=darwin GOARCH=386   go build ${LDFLAGS} -o robotstxt-datastore-darwin-386
-	@GOOS=darwin GOARCH=amd64 go build ${LDFLAGS} -o robotstxt-datastore-darwin-amd64
+	@GOOS=darwin GOARCH=386   go build ${LDFLAGS} -a -o robotstxt-datastore-darwin-386 .
+	@GOOS=darwin GOARCH=amd64 go build ${LDFLAGS} -a -o robotstxt-datastore-darwin-amd64 .
 
 build-linux:
-	@GOOS=linux GOARCH=386   go build ${LDFLAGS} --tags production -o robotstxt-datastore-linux-386
-	@GOOS=linux GOARCH=amd64 go build ${LDFLAGS} --tags production -o robotstxt-datastore-linux-amd64
+	@GOOS=linux GOARCH=386   go build ${LDFLAGS} -a -o robotstxt-datastore-linux-386 .
+	@GOOS=linux GOARCH=amd64 go build ${LDFLAGS} -a -o robotstxt-datastore-linux-amd64 .
 
 clean:
 	@rm -f robotstxt-datastore robotstxt-datastore-darwin-* robotstxt-datastore-linux-*

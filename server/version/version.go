@@ -18,7 +18,7 @@ var (
 )
 
 func PrintInfo() {
-	fmt.Printf("robotstxt-service\n")
+	fmt.Printf("robotstxt-datastore\n")
 	fmt.Printf("  Version    : %s\n", Version)
 	fmt.Printf("  Git commit : %s\n", GitCommit)
 	fmt.Printf("  Go Version : %s\n", runtime.Version())
