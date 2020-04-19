@@ -35,7 +35,7 @@ func TestCheckRobotstxt(t *testing.T) {
 		var service serviceRobotstxt
 		result, err := service.CheckRobotstxt(context.Background(), &pb.Check{Host: ""})
 		assert.NotNil(t, err)
-		assert.Equal(t, "rpc error: code = InvalidArgument desc = host cannot be empty", err.Error())
+		assert.Equal(t, errorHostCannotBeEmpty, err)
 		assert.Nil(t, result)
 
 		testTeardown()
@@ -81,6 +81,38 @@ func TestCheckRobotstxt(t *testing.T) {
 		assert.Equal(t, testserver404URL.Host, result.Host)
 		//assert.Equal(t, "https", result.Scheme)
 		assert.Equal(t, int32(404), result.Statuscode)
+		assert.NotEqual(t, int64(0), result.ResponseTime)
+		assert.Equal(t, "", result.Robotstxt)
+		assert.Len(t, result.Sitemaps, 0)
+		assert.Len(t, result.Rules, 0)
+
+		testTeardown()
+	})
+
+	t.Run("wrong Content-Type", func(t *testing.T) {
+		testSetup()
+
+		// create a mock http server with a wrong Content-Type
+		router := http.NewServeMux()
+		router.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
+			// sleep a few milliseconds to set the response time to not zero
+			time.Sleep(100 * time.Millisecond)
+			w.Header().Set("Content-Type", "text/html")
+			fmt.Fprintln(w, []byte("<h1>test it</h1>"))
+		})
+		testserver := httptest.NewServer(router)
+		defer testserver.Close()
+		testserverURL, err := url.Parse(testserver.URL)
+		if err != nil {
+			panic(err)
+		}
+
+		var service serviceRobotstxt
+		result, err := service.CheckRobotstxt(context.Background(), &pb.Check{Host: testserverURL.Host})
+		assert.Nil(t, err)
+		assert.Equal(t, testserverURL.Host, result.Host)
+		assert.Equal(t, "http", result.Scheme)
+		assert.Equal(t, int32(200), result.Statuscode)
 		assert.NotEqual(t, int64(0), result.ResponseTime)
 		assert.Equal(t, "", result.Robotstxt)
 		assert.Len(t, result.Sitemaps, 0)
@@ -260,6 +292,19 @@ func TestReadRobotstxt(t *testing.T) {
 		testTeardown()
 	})
 
+	t.Run("host empty", func(t *testing.T) {
+		testSetup()
+
+		var service serviceRobotstxt
+		in := &pb.GetRobotstxtRequest{Host: ""}
+		result, err := service.GetRobotstxt(context.Background(), in)
+		assert.NotNil(t, err)
+		assert.Equal(t, errorHostCannotBeEmpty, err)
+		assert.Nil(t, result)
+
+		testTeardown()
+	})
+
 	t.Run("not found", func(t *testing.T) {
 		testSetup()
 
@@ -267,7 +312,7 @@ func TestReadRobotstxt(t *testing.T) {
 		in := &pb.GetRobotstxtRequest{Host: "notfound.com"}
 		result, err := service.GetRobotstxt(context.Background(), in)
 		assert.NotNil(t, err)
-		assert.Equal(t, "rpc error: code = NotFound desc = host not found", err.Error())
+		assert.Equal(t, errorHostNotFound, err)
 		assert.Nil(t, result)
 
 		testTeardown()
