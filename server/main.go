@@ -29,6 +29,7 @@ var (
 	cfg      Config
 )
 
+// Config store the environment variables to configure the server
 type Config struct {
 	ServerAddress        string `envconfig:"SERVER_ADDR"       default:":5000"`
 	DatabaseHost         string `envconfig:"DATABASE_HOST"     default:"localhost"`

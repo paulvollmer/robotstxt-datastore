@@ -121,7 +121,7 @@ func TestCheckRobotstxt(t *testing.T) {
 		testTeardown()
 	})
 
-	var testUrl string
+	var testURI string
 	var useragent string
 	// create a mock http server
 	router := http.NewServeMux()
@@ -129,17 +129,17 @@ func TestCheckRobotstxt(t *testing.T) {
 		// sleep a few milliseconds to set the response time to not zero
 		time.Sleep(100 * time.Millisecond)
 		w.Header().Set("Content-Type", "text/plain")
-		fmt.Fprintln(w, genRobotstxt(testUrl, useragent))
+		fmt.Fprintln(w, genRobotstxt(testURI, useragent))
 	})
 
 	testserver := httptest.NewServer(router)
 	defer testserver.Close()
-	testUrl = testserver.URL
-	testUrlParsed, err := url.Parse(testUrl)
+	testURI = testserver.URL
+	testURIParsed, err := url.Parse(testURI)
 	if err != nil {
 		panic(err)
 	}
-	testHost := testUrlParsed.Host
+	testHost := testURIParsed.Host
 	useragent = "testbot"
 
 	resultEqual := func(t *testing.T, result *pb.Robotstxt) {
@@ -147,9 +147,9 @@ func TestCheckRobotstxt(t *testing.T) {
 		assert.Equal(t, "http", result.Scheme)
 		assert.Equal(t, int32(200), result.Statuscode)
 		assert.NotEqual(t, int64(0), result.ResponseTime)
-		assert.Equal(t, genRobotstxt(testUrl, useragent)+"\n", result.Robotstxt)
+		assert.Equal(t, genRobotstxt(testURI, useragent)+"\n", result.Robotstxt)
 		assert.Len(t, result.Sitemaps, 1)
-		assert.Equal(t, testUrl+"/sitemap.xml", result.Sitemaps[0])
+		assert.Equal(t, testURI+"/sitemap.xml", result.Sitemaps[0])
 		assert.Len(t, result.Rules, 2)
 		assert.ElementsMatch(t, []*pb.Rule{
 			{Agent: "*", Paths: []string{"/signup"}},

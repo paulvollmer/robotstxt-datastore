@@ -63,7 +63,7 @@ func (s *serviceRobotstxt) CheckRobotstxt(ctx context.Context, in *pb.Check) (*p
 	}
 
 	// fetch the robots.txt data
-	targetUri := buildRobotstxtURL(host)
+	targetURI := buildRobotstxtURL(host)
 	robotstxtData := []byte{}
 	var client http.Client
 
@@ -74,7 +74,7 @@ func (s *serviceRobotstxt) CheckRobotstxt(ctx context.Context, in *pb.Check) (*p
 	//	},
 	//}
 
-	req, err := http.NewRequest("GET", targetUri, nil)
+	req, err := http.NewRequest("GET", targetURI, nil)
 	if err != nil {
 		sentryCaptureException(err, host, "req get")
 		return nil, status.Error(codes.Internal, err.Error())
