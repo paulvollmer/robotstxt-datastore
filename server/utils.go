@@ -50,7 +50,7 @@ func MapDBtoProtoResponse(data *ent.Robotstxt) (*pb.Robotstxt, error) {
 		Statuscode:   data.Statuscode,
 		ResponseUrl:  data.ResponseURL,
 		ResponseTime: data.ResponseTime,
-		Robotstxt:    string(data.Body),
+		Robotstxt:    data.Body,
 	}
 
 	if len(data.Body) == 0 {
