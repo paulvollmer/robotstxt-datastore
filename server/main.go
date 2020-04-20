@@ -29,19 +29,20 @@ var (
 	cfg      Config
 )
 
+// Config store the environment variables to configure the server
 type Config struct {
-	ServerAddress        string `envconfig:"SERVER_ADDR"       default:":5000"`
-	DatabaseHost         string `envconfig:"DATABASE_HOST"     default:"localhost"`
-	DatabasePort         string `envconfig:"DATABASE_PORT"     default:"5432"`
-	DatabaseUser         string `envconfig:"DATABASE_USER"     default:"postgres"`
-	DatabasePassword     string `envconfig:"DATABASE_PASSWORD" default:"password"`
-	DatabaseName         string `envconfig:"DATABASE_NAME"     default:"robotstxt"`
-	DatabaseSSLMode      string `envconfig:"DATABASE_SSLMODE"  default:"disable"`
-	DefaultRefreshAfter  int32  `envconfig:"REFRESH_AFTER"     default:"864000"`
-	DefaultRequestScheme string `envconfig:"DEFAULT_REQUEST_SCHEME"  default:"https"`
-	DefaultLimit         int    `envconfig:"DEFAULT_LIMIT"     default:"100"`
-	UserAgent            string `envconfig:"USERAGENT"         default:"robotstxtbot"`
-	SentryDSN            string `envconfig:"SENTRY_DSN"        default:""`
+	ServerAddress        string `envconfig:"SERVER_ADDR"            default:":5000"`
+	DatabaseHost         string `envconfig:"DATABASE_HOST"          default:"localhost"`
+	DatabasePort         string `envconfig:"DATABASE_PORT"          default:"5432"`
+	DatabaseUser         string `envconfig:"DATABASE_USER"          default:"postgres"`
+	DatabasePassword     string `envconfig:"DATABASE_PASSWORD"      default:"password"`
+	DatabaseName         string `envconfig:"DATABASE_NAME"          default:"robotstxt"`
+	DatabaseSSLMode      string `envconfig:"DATABASE_SSLMODE"       default:"disable"`
+	DefaultRefreshAfter  int32  `envconfig:"REFRESH_AFTER"          default:"864000"`
+	DefaultRequestScheme string `envconfig:"DEFAULT_REQUEST_SCHEME" default:"https"`
+	DefaultLimit         int    `envconfig:"DEFAULT_LIMIT"          default:"100"`
+	UserAgent            string `envconfig:"USERAGENT"              default:"robotstxtbot"`
+	SentryDSN            string `envconfig:"SENTRY_DSN"             default:""`
 }
 
 func main() {

@@ -24,7 +24,7 @@ type serviceRobotstxt struct{}
 func (s *serviceRobotstxt) CheckRobotstxt(ctx context.Context, in *pb.Check) (*pb.Robotstxt, error) {
 	log.Println("CheckRobotstxt:", in)
 
-	// if refreshAfter is zero, set to default (10 days)
+	// if refreshAfter is zero, set to default value
 	refreshAfter := in.GetRefreshAfter()
 	if refreshAfter == 0 {
 		refreshAfter = cfg.DefaultRefreshAfter
@@ -32,20 +32,21 @@ func (s *serviceRobotstxt) CheckRobotstxt(ctx context.Context, in *pb.Check) (*p
 	refresh := in.Refresh
 
 	// is the host not empty
-	if in.GetHost() == "" {
-		return nil, status.Error(codes.InvalidArgument, "host cannot be empty")
+	host := in.GetHost()
+	if host == "" {
+		return nil, errorHostCannotBeEmpty
 	}
 
 	// exist the database entry?
-	foundDB, err := dbClient.Robotstxt.Query().Where(robotstxt.Host(in.GetHost())).All(ctx)
+	foundDB, err := dbClient.Robotstxt.Query().Where(robotstxt.Host(host)).All(ctx)
 	if err != nil {
-		sentry.CaptureException(err)
+		sentryCaptureException(err, host, "db query")
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	if len(foundDB) == 1 {
 		found, err := MapDBtoProtoResponse(foundDB[0])
 		if err != nil {
-			sentry.CaptureException(err)
+			sentryCaptureException(err, host, "map db")
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 		log.Println("--> Found at database, sitemaps total:", len(found.Sitemaps))
@@ -62,7 +63,7 @@ func (s *serviceRobotstxt) CheckRobotstxt(ctx context.Context, in *pb.Check) (*p
 	}
 
 	// fetch the robots.txt data
-	targetUri := cfg.DefaultRequestScheme + "://" + in.GetHost() + "/robots.txt"
+	targetURI := buildRobotstxtURL(host)
 	robotstxtData := []byte{}
 	var client http.Client
 
@@ -73,9 +74,9 @@ func (s *serviceRobotstxt) CheckRobotstxt(ctx context.Context, in *pb.Check) (*p
 	//	},
 	//}
 
-	req, err := http.NewRequest("GET", targetUri, nil)
+	req, err := http.NewRequest("GET", targetURI, nil)
 	if err != nil {
-		sentry.CaptureException(err)
+		sentryCaptureException(err, host, "req get")
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	req.Header.Set("User-Agent", cfg.UserAgent)
@@ -83,27 +84,51 @@ func (s *serviceRobotstxt) CheckRobotstxt(ctx context.Context, in *pb.Check) (*p
 	resp, err := client.Do(req)
 	responseTime := time.Since(start)
 	if err != nil {
-		// if a client error occur, create a database entry and set the StatusCode to zero
-		data, err := dbClient.Robotstxt.Create().
-			SetHost(in.GetHost()).
-			SetScheme(cfg.DefaultRequestScheme).
-			SetStatuscode(0).
-			SetResponseTime(responseTime.Milliseconds()).
-			SetResponseURL("").
-			SetBody([]byte("")).
-			Save(ctx)
-		if err != nil {
-			sentry.CaptureException(err)
-			return nil, status.Error(codes.Internal, err.Error())
+		if len(foundDB) == 0 {
+			// if a client error occur and the data was not found at the database,
+			// create a database entry and set the StatusCode to zero
+			data, err := dbClient.Robotstxt.Create().
+				SetHost(host).
+				SetScheme(cfg.DefaultRequestScheme).
+				SetStatuscode(0).
+				SetResponseTime(responseTime.Milliseconds()).
+				SetResponseURL("").
+				SetBody([]byte("")).
+				Save(ctx)
+			if err != nil {
+				sentryCaptureException(err, host, "db create")
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+			res, err := MapDBtoProtoResponse(data)
+			return res, err
 		}
-		res, err := MapDBtoProtoResponse(data)
-		return res, err
+		// if the data was not found at the database, return an error without writing to the database
+		return nil, status.Error(codes.Aborted, err.Error())
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusOK {
+
+		if isHeaderContentTypeTextPlain(resp.Header) == false {
+			log.Println("--> Content-Type is not text/plain")
+			data, err := dbClient.Robotstxt.Create().
+				SetHost(host).
+				SetScheme(resp.Request.URL.Scheme).
+				SetStatuscode(int32(resp.StatusCode)).
+				SetResponseTime(responseTime.Milliseconds()).
+				SetResponseURL(resp.Request.URL.String()).
+				SetBody([]byte("")).
+				Save(ctx)
+			if err != nil {
+				sentryCaptureException(err, host, "db create")
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+			res, err := MapDBtoProtoResponse(data)
+			return res, err
+		}
+
 		robotstxtData, err = ioutil.ReadAll(resp.Body)
 		if err != nil {
-			sentry.CaptureException(err)
+			sentryCaptureException(err, host, "req read body")
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	}
@@ -112,7 +137,7 @@ func (s *serviceRobotstxt) CheckRobotstxt(ctx context.Context, in *pb.Check) (*p
 	if len(foundDB) == 0 {
 		log.Println("--> Create database entry...")
 		data, err := dbClient.Robotstxt.Create().
-			SetHost(in.GetHost()).
+			SetHost(host).
 			SetScheme(resp.Request.URL.Scheme).
 			SetStatuscode(int32(resp.StatusCode)).
 			SetResponseTime(responseTime.Milliseconds()).
@@ -120,7 +145,7 @@ func (s *serviceRobotstxt) CheckRobotstxt(ctx context.Context, in *pb.Check) (*p
 			SetBody(robotstxtData).
 			Save(ctx)
 		if err != nil {
-			sentry.CaptureException(err)
+			sentryCaptureException(err, host, "db create")
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 		res, err := MapDBtoProtoResponse(data)
@@ -138,7 +163,7 @@ func (s *serviceRobotstxt) CheckRobotstxt(ctx context.Context, in *pb.Check) (*p
 			SetBody(robotstxtData).
 			Save(ctx)
 		if err != nil {
-			sentry.CaptureException(err)
+			sentryCaptureException(err, host, "db update")
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 		res, err := MapDBtoProtoResponse(data)
@@ -222,22 +247,22 @@ func (s *serviceRobotstxt) GetRobotstxt(ctx context.Context, in *pb.GetRobotstxt
 	log.Printf("GetRobotstxt Host: %q\n", host)
 
 	if host == "" {
-		return nil, status.Error(codes.InvalidArgument, "host cannot be empty")
+		return nil, errorHostCannotBeEmpty
 	}
 
 	data, err := dbClient.Robotstxt.Query().Where(robotstxt.Host(host)).All(ctx)
 	if err != nil {
-		sentry.CaptureException(err)
+		sentryCaptureException(err, host, "db query")
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	if len(data) == 0 {
-		return nil, status.Error(codes.NotFound, "host not found")
+		return nil, errorHostNotFound
 	}
 
 	res, err := MapDBtoProtoResponse(data[0])
 	if err != nil {
-		sentry.CaptureException(err)
+		sentryCaptureException(err, host, "map db")
 		return nil, err
 	}
 	return res, nil
