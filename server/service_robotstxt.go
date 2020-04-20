@@ -84,21 +84,26 @@ func (s *serviceRobotstxt) CheckRobotstxt(ctx context.Context, in *pb.Check) (*p
 	resp, err := client.Do(req)
 	responseTime := time.Since(start)
 	if err != nil {
-		// if a client error occur, create a database entry and set the StatusCode to zero
-		data, err := dbClient.Robotstxt.Create().
-			SetHost(host).
-			SetScheme(cfg.DefaultRequestScheme).
-			SetStatuscode(0).
-			SetResponseTime(responseTime.Milliseconds()).
-			SetResponseURL("").
-			SetBody([]byte("")).
-			Save(ctx)
-		if err != nil {
-			sentryCaptureException(err, host, "db create")
-			return nil, status.Error(codes.Internal, err.Error())
+		if len(foundDB) == 0 {
+			// if a client error occur and the data was not found at the database,
+			// create a database entry and set the StatusCode to zero
+			data, err := dbClient.Robotstxt.Create().
+				SetHost(host).
+				SetScheme(cfg.DefaultRequestScheme).
+				SetStatuscode(0).
+				SetResponseTime(responseTime.Milliseconds()).
+				SetResponseURL("").
+				SetBody([]byte("")).
+				Save(ctx)
+			if err != nil {
+				sentryCaptureException(err, host, "db create")
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+			res, err := MapDBtoProtoResponse(data)
+			return res, err
 		}
-		res, err := MapDBtoProtoResponse(data)
-		return res, err
+		// if the data was not found at the database, return an error without writing to the database
+		return nil, status.Error(codes.Aborted, err.Error())
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusOK {

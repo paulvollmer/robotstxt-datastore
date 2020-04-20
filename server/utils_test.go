@@ -78,20 +78,20 @@ func TestMapDBtoProtoResponse(t *testing.T) {
 		assert.Equal(t, int32(200), result.Statuscode)
 		assert.Equal(t, "https://example.com/robots.txt", result.ResponseUrl)
 		assert.Equal(t, int64(100), result.ResponseTime)
-		assert.Equal(t, "", result.Robotstxt)
+		assert.Equal(t, []byte(""), result.Robotstxt)
 		assert.Len(t, result.Rules, 0)
 		assert.Len(t, result.Sitemaps, 0)
 	})
 
 	t.Run("body valid", func(t *testing.T) {
-		body := "Sitemap: https://example.com/sitemap1.xml\nSitemap: https://example.com/sitemap2.xml"
+		body := []byte("Sitemap: https://example.com/sitemap1.xml\nSitemap: https://example.com/sitemap2.xml")
 		data := ent.Robotstxt{
 			Host:         "example.com",
 			Scheme:       "https",
 			Statuscode:   200,
 			ResponseURL:  "https://example.com/robots.txt",
 			ResponseTime: 100,
-			Body:         []byte(body),
+			Body:         body,
 		}
 		result, err := MapDBtoProtoResponse(&data)
 		assert.Nil(t, err)
