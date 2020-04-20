@@ -58,7 +58,7 @@ message Robotstxt {
   int64 response_time = 7;
 
   // The server response body
-  string robotstxt = 8;
+  bytes robotstxt = 8;
 
   // The robots.txt rules array
   repeated Rule rules = 9;
