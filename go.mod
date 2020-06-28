@@ -10,8 +10,8 @@ require (
 	github.com/lib/pq v1.3.0
 	github.com/mattn/go-sqlite3 v1.11.0
 	github.com/paulvollmer/robotstxt v1.2.0
-	github.com/spf13/cobra v0.0.5
-	github.com/spf13/viper v1.3.2
+	github.com/spf13/cobra v0.0.7
+	github.com/spf13/viper v1.4.0
 	github.com/stretchr/testify v1.5.1
 	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e
 	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
