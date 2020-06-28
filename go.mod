@@ -7,7 +7,7 @@ require (
 	github.com/getsentry/sentry-go v0.6.0
 	github.com/golang/protobuf v1.4.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/lib/pq v1.3.0
+	github.com/lib/pq v1.7.0
 	github.com/mattn/go-sqlite3 v1.14.0
 	github.com/paulvollmer/robotstxt v1.2.0
 	github.com/spf13/cobra v0.0.7
