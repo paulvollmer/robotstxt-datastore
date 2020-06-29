@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/facebookincubator/ent v0.2.5
-	github.com/getsentry/sentry-go v0.6.0
+	github.com/getsentry/sentry-go v0.6.1
 	github.com/golang/protobuf v1.4.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lib/pq v1.7.0
