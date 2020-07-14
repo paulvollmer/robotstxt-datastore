@@ -67,6 +67,8 @@ github.com/facebookincubator/ent v0.1.4 h1:1Y9icmCryGStA4e8hfNV0VS4wQkoIVZI3tzis
 github.com/facebookincubator/ent v0.1.4/go.mod h1:jiRo17tHbJ3o+lEhwkPtVyavsgEFn38x4BJ6DzXg8wc=
 github.com/facebookincubator/ent v0.2.5 h1:VMw6rOhxKWeKpIMTzJCFswoECr4Wm8gvWIlqNz3L95c=
 github.com/facebookincubator/ent v0.2.5/go.mod h1:c8i2zwiCm/PVGoOBI9omOi7H/u7siUi5FTqJ8V4PMXs=
+github.com/facebookincubator/ent v0.2.6 h1:eK2BAsiZDnYNsznGszNvFY2c7lY+SRYWKAIG6J4jZpI=
+github.com/facebookincubator/ent v0.2.6/go.mod h1:c8i2zwiCm/PVGoOBI9omOi7H/u7siUi5FTqJ8V4PMXs=
 github.com/fasthttp-contrib/websocket v0.0.0-20160511215533-1f3b11f56072/go.mod h1:duJ4Jxv5lDcvg4QuQr0oowTf7dz4/CR8NtyCooz9HL8=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
 github.com/fatih/structs v1.1.0/go.mod h1:9NiDSp5zOcgEDl+j00MP/WkGVPOlPRLejGD8Ga6PJ7M=

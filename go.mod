@@ -3,7 +3,7 @@ module github.com/paulvollmer/robotstxt-datastore
 go 1.14
 
 require (
-	github.com/facebookincubator/ent v0.2.5
+	github.com/facebookincubator/ent v0.2.6
 	github.com/getsentry/sentry-go v0.6.1
 	github.com/golang/protobuf v1.4.2
 	github.com/kelseyhightower/envconfig v1.4.0
